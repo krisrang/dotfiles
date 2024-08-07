@@ -1,20 +1,17 @@
 #!/bin/zsh
 
 rbenv=$1
-root=~/.dotfiles/
-
-if [ ! -z "$CODER_WORKSPACE_NAME" ]; then
-  root=~/.config/coderv2/dotfiles
-fi
 
 # --- Functions --- #
 # Notice title
 function notice { echo -e "\033[1;32m=> $1\033[0m"; }
 
+# Error title
+function error { echo -e "\033[1;31m=> Error: $1\033[0m"; }
+
 function fetch_external {
   if [ -d $1 ]; then
-    cd $1
-    git pull
+    git -C $1 pull
   else
     mkdir -p $1
     git clone $2 $1
@@ -23,7 +20,6 @@ function fetch_external {
 
 function install {
   notice "Copying dotfiles"
-  cd $root
   rsync -rv --exclude '.git' --exclude 'bootstrap.sh' --exclude 'install.sh' --exclude 'README.md' --include '.**' ./ ~/
 }
 
@@ -33,11 +29,10 @@ function externals {
     git clone --recursive https://github.com/robbyrussell/oh-my-zsh.git "${ZDOTDIR:-$HOME}/.oh-my-zsh"
   else
     notice "Updating oh-my-zsh"
-    cd "${ZDOTDIR:-$HOME}/.oh-my-zsh"
-    git pull
-    cd ~
+    git -C "${ZDOTDIR:-$HOME}/.oh-my-zsh" pull
   fi
 
+  notice "Updating plugins"
   fetch_external ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting "https://github.com/zsh-users/zsh-syntax-highlighting.git"
   fetch_external ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions "https://github.com/zsh-users/zsh-autosuggestions.git"
   fetch_external ~/.oh-my-zsh/custom/themes/spaceship-prompt "https://github.com/denysdovhan/spaceship-prompt.git"
@@ -50,6 +45,11 @@ function externals {
     fetch_external ~/.rbenv/plugins/rbenv-vars "https://github.com/sstephenson/rbenv-vars.git"
   fi
 }
+
+if [ ! -f ./install.sh ] || [ ! -f ./bootstrap.sh ]; then
+  error "Are you in the dotfiles directory?"
+  exit 1
+fi
 
 externals
 install

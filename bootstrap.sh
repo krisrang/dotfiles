@@ -1,8 +1,5 @@
 #!/bin/zsh
 
-dorbenv=$1
-root=~/.dotfiles/
-
 # --- Functions --- #
 # Notice title
 function notice { echo -e "\033[1;32m=> $1\033[0m"; }
@@ -49,9 +46,8 @@ fi
 
 if [ -f ./install.sh ]; then
   notice "Installing"
-  cd $root
   git pull origin main
-  ./install.sh $dorbenv
+  ./install.sh $@
 fi
 
 # --- Finished --- #
